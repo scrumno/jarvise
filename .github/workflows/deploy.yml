@@ -1,0 +1,37 @@
+name: Deploy to VDS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            # Переходим в папку
+            cd /var/www/jarvis
+
+            # Скачиваем обновления
+            git pull origin main
+
+            # Обновляем библиотеки (если изменился composer.json)
+            # --no-dev не ставит тестовые библиотеки, --optimize-autoloader ускоряет работу
+            composer install --no-dev --optimize-autoloader
+
+            # На всякий случай чиним права доступа (чтобы Apache мог читать файлы)
+            chown -R www-data:www-data /var/www/jarvis
+            chmod -R 775 /var/www/jarvis/storage 2>/dev/null || true
+
+            # Если нужно перезагрузить какие-то службы (опционально)
+            # service apache2 reload
+
+            echo "Deployment successful!"
