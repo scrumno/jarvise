@@ -14,7 +14,6 @@ class WeatherController
     private $aiService;
     private $telegramService;
 
-    // Автоматическая инъекция зависимостей через DI
     public function __construct(
         WeatherService $weather,
         GeminiService $ai,
