@@ -7,8 +7,8 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Путь к директории проекта на сервере
-PROJECT_PATH="/var/www/your-project"
-BRANCH="master"
+PROJECT_PATH="/var/www/jarvis"
+BRANCH="main"
 
 echo -e "${YELLOW}Начинаем деплой проекта...${NC}"
 
@@ -48,13 +48,5 @@ echo -e "${GREEN}Composer зависимости установлены${NC}"
 echo -e "${YELLOW}Настраиваем права на файлы...${NC}"
 chmod -R 755 storage bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
-
-# Очистка кеша (для Laravel и подобных фреймворков, опционально)
-if [ -f artisan ]; then
-    echo -e "${YELLOW}Очищаем кеш Laravel...${NC}"
-    php artisan config:cache
-    php artisan route:cache
-    php artisan view:cache
-fi
 
 echo -e "${GREEN}✓ Деплой успешно завершен!${NC}"
