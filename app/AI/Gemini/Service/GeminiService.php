@@ -22,7 +22,7 @@ class GeminiService
         $key = $this->settings['gemini_key'];
 
         // Используем gemini-pro для стабильности
-        $url = "{$proxy}/v1beta/models/gemini-pro:generateContent?key={$key}";
+        $url = "{$proxy}/v1beta/models/gemini-2.5-flash-live:generateContent?key={$key}";
 
         $body = ['contents' => [['parts' => [['text' => $prompt]]]]];
 
