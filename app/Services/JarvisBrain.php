@@ -32,7 +32,7 @@ class JarvisBrain
         $key = $this->settings['gemini_key'];
 
         // Формируем URL к твоему Worker'у
-        $url = "{$proxy}/v1beta/models/gemini-1.5-flash:generateContent?key={$key}";
+        $url = "{$proxy}/v1beta/models/gemini-pro:generateContent?key={$key}";
 
         $body = [
             'contents' => [
