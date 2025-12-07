@@ -20,13 +20,20 @@ class WeatherController
     public function handle(Request $request, Response $response)
     {
         // 1. Получаем погоду (Хабаровск)
-        $weather = $this->weather->getForecast(48.48, 135.07);
+        $w = $this->weather->getForecast(48.48, 135.07);
 
         // 2. Генерируем промпт
-        $prompt = "Ты — мой бро. Мы в Хабаровске. 
-        Погода: макс +{$weather['temp_max']}C, дождь {$weather['rain_prob']}%.
-        Напиши короткое сообщение в ТГ.
-        Если дождь > 40% — скажи взять зонт. Используй сленг.";
+        $prompt = "Ты — мой кент в Хабаровске. 
+Погода на сегодня: 
+- На улице: {$w['condition']}
+- Температура: днем {$w['temp_max']}°C (ночью до {$w['temp_min']}°C).
+- Ощущается как: {$w['feels_like']}°C (Ветер: {$w['wind_speed']} км/ч).
+- Шанс осадков: {$w['precip_prob']}%.
+
+Напиши короткое сообщение в ТГ (до 2 предложений). Стиль: современный сленг, дерзкий.
+1. Если 'feels_like' ниже -20, ори, чтобы я оделся как капуста.
+2. Если идет снег (is_snow = true), скажи про дрифт или сугробы.
+3. Если ветер сильный (>20 км/ч), скажи, что сдует лицо.";
 
         // 3. AI генерирует текст
         $message = $this->ai->generateText($prompt);
@@ -37,7 +44,7 @@ class WeatherController
         // 5. Ответ
         $payload = json_encode([
             'status'  => 'success',
-            'data'    => $weather,
+            'data'    => $w,
             'message' => $message,
         ]);
 
