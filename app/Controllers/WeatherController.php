@@ -10,24 +10,17 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class WeatherController
 {
-    private $weatherService;
-    private $aiService;
-    private $telegramService;
-
     public function __construct(
-        WeatherService $weather,
-        GeminiService $ai,
-        TelegramService $tg
+        private readonly WeatherService $weather,
+        private readonly GeminiService $ai,
+        private readonly TelegramService $tg
     ) {
-        $this->weatherService = $weather;
-        $this->aiService = $ai;
-        $this->telegramService = $tg;
     }
 
     public function handle(Request $request, Response $response)
     {
         // 1. Получаем погоду (Хабаровск)
-        $weather = $this->weatherService->getForecast(48.48, 135.07);
+        $weather = $this->weather->getForecast(48.48, 135.07);
 
         // 2. Генерируем промпт
         $prompt = "Ты — мой бро. Мы в Хабаровске. 
@@ -36,10 +29,10 @@ class WeatherController
         Если дождь > 40% — скажи взять зонт. Используй сленг.";
 
         // 3. AI генерирует текст
-        $message = $this->aiService->generateText($prompt);
+        $message = $this->ai->generateText($prompt);
 
         // 4. Отправляем в ТГ
-        $this->telegramService->sendMessage($message);
+        $this->tg->sendMessage($message);
 
         // 5. Ответ
         $payload = json_encode([
