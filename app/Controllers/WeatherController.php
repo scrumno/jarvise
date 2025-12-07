@@ -2,57 +2,52 @@
 
 namespace App\Controllers;
 
-use App\Services\JarvisBrain;
+use App\Services\WeatherService;
+use App\AI\Gemini\Service\GeminiService;
+use App\Telegram\Service\TelegramService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 class WeatherController
 {
-    private $jarvis;
+    private $weatherService;
+    private $aiService;
+    private $telegramService;
 
-    public function __construct(JarvisBrain $jarvis)
-    {
-        $this->jarvis = $jarvis;
+    // Автоматическая инъекция зависимостей через DI
+    public function __construct(
+        WeatherService $weather,
+        GeminiService $ai,
+        TelegramService $tg
+    ) {
+        $this->weatherService = $weather;
+        $this->aiService = $ai;
+        $this->telegramService = $tg;
     }
 
-    public function check(Request $request, Response $response)
+    public function handle(Request $request, Response $response)
     {
-        // 1. Получаем данные о погоде (Хабаровск)
-        // Координаты: 48.48, 135.07
-        $weather = $this->jarvis->getWeather(48.48, 135.07);
+        // 1. Получаем погоду (Хабаровск)
+        $weather = $this->weatherService->getForecast(48.48, 135.07);
 
-        // Берем данные (если API вернул null, ставим 0)
-        $rainProb = $weather['daily']['precipitation_probability_max'][0] ?? 0;
-        $tempMax = $weather['daily']['temperature_2m_max'][0] ?? 0;
+        // 2. Генерируем промпт
+        $prompt = "Ты — мой бро. Мы в Хабаровске. 
+        Погода: макс +{$weather['temp_max']}C, дождь {$weather['rain_prob']}%.
+        Напиши короткое сообщение в ТГ.
+        Если дождь > 40% — скажи взять зонт. Используй сленг.";
 
-        // 2. Формируем запрос к ИИ (Новая личность)
-        $prompt = "Ты — мой кент и лучший друг. Мы в Хабаровске.
-        Прогноз на сегодня: макс. температура {$tempMax}°C.
-        
-        Напиши мне короткое сообщение в Телеграм (максимум 2 предложения).
-        Стиль: современный, смешной, используй сленг (типа «бро», «жесть», «имба»), можно легкий мат или наезды.
-        
-        Задача:
-        Если больше -20, скажи, что сильно холодно
-        Если меньше -20, скажи, что не сильно холодно
-        Если есть ветер или снег, скажи, что есть снег
-        ";
+        // 3. AI генерирует текст
+        $message = $this->aiService->generateText($prompt);
 
-        // 3. Получаем текст от ИИ
-        $aiMessage = $this->jarvis->askGemini($prompt);
+        // 4. Отправляем в ТГ
+        $this->telegramService->sendMessage($message);
 
-        // 4. Отправляем в Телеграм
-        $this->jarvis->notifyTelegram($aiMessage);
-
-        // 5. Отдаем JSON для PWA (или для логов)
+        // 5. Ответ
         $payload = json_encode([
             'status'  => 'success',
-            'weather' => [
-                'rain_prob' => $rainProb,
-                'temp_max'  => $tempMax,
-            ],
-            'message' => $aiMessage,
-        ], JSON_UNESCAPED_UNICODE);
+            'data'    => $weather,
+            'message' => $message,
+        ]);
 
         $response->getBody()->write($payload);
 
