@@ -6,11 +6,8 @@ use GuzzleHttp\Client;
 
 class WeatherService
 {
-    private $http;
-
-    public function __construct(Client $http)
+    public function __construct(private readonly Client $http)
     {
-        $this->http = $http;
     }
 
     public function getForecast(float $lat, float $lon): array

@@ -7,13 +7,13 @@ use Psr\Container\ContainerInterface;
 
 class TelegramService
 {
-    private $http;
     private $token;
     private $chatId;
 
-    public function __construct(Client $http, ContainerInterface $c)
-    {
-        $this->http = $http;
+    public function __construct(
+        private readonly Client $http,
+        private readonly ContainerInterface $c
+    ) {
         $settings = $c->get('settings')['api'];
         $this->token = $settings['tg_token'];
         $this->chatId = $settings['tg_chat_id'];
