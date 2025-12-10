@@ -51,7 +51,7 @@ return [
         $proxy = rtrim($cfg['proxy_url'], '/');
         $key = $cfg['gemini_key'];
         $http = $c->get(Client::class);
-        $systemInstruction = $cfg['prompts']['generatePost'];
+        $systemInstruction = $c->get('settings')['prompts']['generatePost'];
 
         // Используем gemini-2.5-flash для стабильности
         $url = "{$proxy}/v1beta/models/gemini-2.5-flash:generateContent?key={$key}";
