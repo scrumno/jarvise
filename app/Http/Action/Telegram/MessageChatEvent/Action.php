@@ -15,7 +15,7 @@ class Action
     ) {
     }
 
-    public function handle(ServerRequestInterface $request, ResponseInterface $response)
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
     {
         // 1. Получаем JSON от Telegram
         $update = $request->getParsedBody();
