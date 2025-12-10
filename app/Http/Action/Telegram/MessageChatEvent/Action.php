@@ -17,22 +17,37 @@ class Action
 
     public function handle(ServerRequestInterface $request, ResponseInterface $response)
     {
-        $input = $request->getParsedBody();
+        // 1. Получаем JSON от Telegram
+        $update = $request->getParsedBody();
 
-        if (!isset($input['message']['text'])) {
+        // Логируем входящий запрос (чтобы видеть, приходит ли он вообще)
+        file_put_contents(__DIR__ . '/../../../../../../telegram_debug.log', print_r($update, true), FILE_APPEND);
+
+        // 2. Проверяем структуру (Телеграм присылает вложенный массив)
+        if (!isset($update['message']['text'])) {
+            // Если это не текст, просто отвечаем ОК
             return $response->withStatus(200);
         }
 
-        $userMessage = $input['message']['text'];
-        $chatId = $input['message']['chat']['id'];
+        // ВАЖНО: Берем данные из правильных полей
+        $chatId = $update['message']['chat']['id'];
+        $userMessage = $update['message']['text'];
 
-        if (isset($input['message']['from']['is_bot']) && $input['message']['from']['is_bot']) {
+        // Защита от зацикливания (не отвечаем сами себе)
+        if (isset($update['message']['from']['is_bot']) && $update['message']['from']['is_bot']) {
             return $response->withStatus(200);
         }
 
-        $message = $this->geminiService->chat($chatId, $userMessage);
+        try {
+            // 3. Спрашиваем Gemini
+            $reply = $this->geminiService->chat((string) $chatId, $userMessage);
 
-        $this->telegramService->sendMessage($chatId, $message);
+            // 4. Отправляем ответ
+            $this->telegramService->sendMessage((string) $chatId, $reply);
+        } catch (\Exception $e) {
+            // Логируем ошибку, если она случилась
+            file_put_contents(__DIR__ . '/../../../../../../telegram_error.log', $e->getMessage(), FILE_APPEND);
+        }
 
         return $response->withStatus(200);
     }
