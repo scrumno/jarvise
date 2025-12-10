@@ -3,6 +3,13 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+file_put_contents(
+    __DIR__ . '/../entry_debug.log',
+    date('H:i:s') . ' Request: ' . $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] . "\n",
+    FILE_APPEND
+);
+
 use Slim\Factory\AppFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
