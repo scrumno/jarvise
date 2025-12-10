@@ -20,9 +20,6 @@ class Action
         // 1. Получаем JSON от Telegram
         $update = $request->getParsedBody();
 
-        // Логируем входящий запрос (чтобы видеть, приходит ли он вообще)
-        file_put_contents(__DIR__ . '/../../../../../../telegram_debug.log', print_r($update, true), FILE_APPEND);
-
         // 2. Проверяем структуру (Телеграм присылает вложенный массив)
         if (!isset($update['message']['text'])) {
             // Если это не текст, просто отвечаем ОК
