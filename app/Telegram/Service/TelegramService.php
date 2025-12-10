@@ -29,6 +29,7 @@ class TelegramService
                 ],
             ]);
         } catch (\Exception $e) {
+            file_put_contents(__DIR__ . '/../../../../telegram_error.log', date('Y-m-d H:i:s') . ' Error: ' . $e->getMessage() . "\n", FILE_APPEND);
         }
     }
 
