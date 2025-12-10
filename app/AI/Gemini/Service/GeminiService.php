@@ -2,6 +2,7 @@
 
 namespace App\AI\Gemini\Service;
 
+use App\Database\ChatMessage\Model\ChatMessage;
 use GuzzleHttp\Client;
 use Psr\Container\ContainerInterface;
 
@@ -11,6 +12,7 @@ class GeminiService
         private readonly Client $http,
         private readonly string $url,
         private readonly ContainerInterface $c,
+        private readonly string $systemInstruction,
     ) {
     }
 
@@ -36,5 +38,46 @@ class GeminiService
         $data = json_decode($response->getBody(), true);
 
         return $data['candidates'][0]['content']['parts'][0]['text'];
+    }
+
+    public function chat(string $chatId, string $userMessage): string
+    {
+        ChatMessage::create([
+            'chat_id' => $chatId,
+            'role'    => 'user',
+            'content' => $userMessage,
+        ]);
+
+        $history = ChatMessage::where('chat_id', $chatId)->orderBy('created_at', 'desc')->take(20)->get()->reverse()->values();
+
+        $contents = $history->map(function ($msg) {
+            return [
+                'role'  => $msg->role,
+                'parts' => [['text' => $msg->content]],
+            ];
+        })->toArray();
+
+        $res = $this->http->post($this->url, [
+            'json' => [
+                'system_instruction' => [
+                    'parts' => [
+                        'text' => $this->systemInstruction,
+                    ],
+                ],
+                'contents' => $contents,
+            ],
+        ]);
+
+        $data = json_decode($res->getBody(), true);
+
+        $botReply = $data['candidates'][0]['content']['parts'][0]['text'] ?? 'Ошибка, пустой ответ';
+
+        ChatMessage::create([
+            'chat_id' => $chatId,
+            'role'    => 'model',
+            'content' => $botReply,
+        ]);
+
+        return $botReply;
     }
 }
