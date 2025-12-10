@@ -3,3 +3,5 @@
 *.env
 env/
 /session.madeline/
+public.pem
+private.key
