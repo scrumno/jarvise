@@ -18,18 +18,17 @@ class TelegramService
         return $this->adminChatId;
     }
 
-    public function sendMessage(string $text): void
+    public function sendMessage(string $chatId, string $text): void
     {
         try {
             $this->http->post($this->url . '/sendMessage', [
                 'json' => [
-                    'chat_id'    => $this->adminChatId,
+                    'chat_id'    => $chatId,
                     'text'       => $text,
                     'parse_mode' => 'Markdown',
                 ],
             ]);
         } catch (\Exception $e) {
-            // Log error
         }
     }
 
