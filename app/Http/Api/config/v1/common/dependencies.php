@@ -37,11 +37,11 @@ return [
         $http = $c->get(Client::class);
         $chatId = $cfg['tg_chat_id'];
 
-        $url = "https://api.telegram.org/bot{$cfg['tg_token']}/sendMessage";
+        $url = "https://api.telegram.org/bot{$cfg['tg_token']}";
 
         return new TelegramService(
             url: $url,
-            chatId: $chatId,
+            adminChatId: $chatId,
             http: $http
         );
     },

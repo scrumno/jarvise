@@ -25,6 +25,11 @@ return [
             'gemini_key' => $_ENV['GEMINI_API_KEY'] ?? '',
             'proxy_url'  => $_ENV['CLOUDFLARE_PROXY'] ?? '',
             'tg_token'   => $_ENV['TG_BOT_TOKEN'] ?? '',
+
+            // MadelinePhoto
+            'tg_app_id'   => $_ENV['TG_APP_ID'],
+            'tg_app_hash' => $_ENV['TG_APP_HASH'],
+
             'tg_chat_id' => $_ENV['TG_CHAT_ID'] ?? '',
         ],
     ],

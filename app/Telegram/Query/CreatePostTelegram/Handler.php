@@ -14,8 +14,14 @@ class Handler
         throw new \Exception('Not implemented');
     }
 
-    public function handle()
-    {
+    public function handle(
+        array $message,
+        string $chatId
+    ) {
+        if ($chatId !== $this->telegramService->getAdminChatId()) {
+            return;
+        }
+
         $text = $this->geminiService->generateTextForPost();
 
         $this->telegramService->createPost($text);

@@ -9,16 +9,21 @@ class TelegramService
     public function __construct(
         private readonly Client $http,
         private readonly string $url,
-        private readonly string $chatId,
+        private readonly string $adminChatId,
     ) {
+    }
+
+    public function getAdminChatId()
+    {
+        return $this->adminChatId;
     }
 
     public function sendMessage(string $text): void
     {
         try {
-            $this->http->post($this->url, [
+            $this->http->post($this->url . '/sendMessage', [
                 'json' => [
-                    'chat_id'    => $this->chatId,
+                    'chat_id'    => $this->adminChatId,
                     'text'       => $text,
                     'parse_mode' => 'Markdown',
                 ],
@@ -30,5 +35,12 @@ class TelegramService
 
     public function createPost(string $text): void
     {
+        $this->http->post($this->url . '/sendMessage', [
+            'json' => [
+                'chat_id'    => $this->adminChatId,
+                'text'       => $text,
+                'parse_mode' => 'Markdown',
+            ],
+        ]);
     }
 }
